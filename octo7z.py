@@ -21,21 +21,17 @@ parser = argparse.ArgumentParser(
     prog='Octo7z',
     epilog="profit??"
 )
-
-parser.add_argument('-c', '--compress', action='store_true') 
-parser.add_argument('-C', '--decompress', action='store_true') 
-parser.add_argument('-t', '--target_dir', action='store')  
-parser.add_argument('-o', '--out_dir', action='store')  
-parser.add_argument('-m', '--method', action='store')  
-parser.add_argument('-n', '--name', action='store')
-parser.add_argument('-p', '--password', action='store')  
-parser.add_argument('-E', '--header_encrypt', action='store_true')  
-parser.add_argument('-y', '--confirm', action='store_true')  
+action_method = parser.add_mutually_exclusive_group(required=True)
+action_method.add_argument('-c', '--compress', action='store_true') 
+action_method.add_argument('-C', '--decompress', action='store_true') 
+parser.add_argument('-t', '--target_dir', action='store', required=True)  
+parser.add_argument('-o', '--out_dir', action='store', required=True)  
+parser.add_argument('-m', '--method', action='store', required=False)  
+parser.add_argument('-n', '--name', action='store', required=True)
+parser.add_argument('-p', '--password', action='store', required=False)  
+parser.add_argument('-E', '--header_encrypt', action='store_true', required=False)  
+parser.add_argument('-y', '--confirm', action='store_true', required=False)  
 args = parser.parse_args()
-
-if args.method not in methods or args.method == "":
-    print("Not a valid method.")
-    exit()
 
 #print(args.target_dir)
 if args.compress and args.decompress:
