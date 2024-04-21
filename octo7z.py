@@ -1,8 +1,7 @@
 import py7zr
 import os
 import argparse
-
-methods = ["LZMA2", "LZMA", "Bzip2", "Deflate", "Copy", "ZStandard", "Brotli", "PPMd"]
+from sys import exit
 
 LZMA2 = py7zr.FILTER_LZMA2
 LZMA = py7zr.FILTER_LZMA
@@ -12,9 +11,11 @@ ZSTANDARD = py7zr.FILTER_ZSTD
 BROTLI = py7zr.FILTER_BROTLI
 PPMD = py7zr.FILTER_PPMD
 
+methods = ["LZMA2", "LZMA", "Bzip2", "Deflate", "Copy", "ZStandard", "Brotli", "PPMd"]
+
 def octo_compress(method="LZMA2", target_dir=".", out_dir=".", name="compressed", encrypt=False, header_enc=False):
     with py7zr.SevenZipFile(f'{out_dir}\\{name}.7z', 'w', header_encryption=header_enc) as archive:
-        archive.writeall(target_dir, 'base')
+        archive.writeall(target_dir)
 
 parser = argparse.ArgumentParser(
     prog='Octo7z',
@@ -25,11 +26,15 @@ parser.add_argument('-C', '--decompress', action='store_true')
 parser.add_argument('-t', '--target_dir', action='store')  
 parser.add_argument('-o', '--out_dir', action='store')  
 parser.add_argument('-m', '--method', action='store')  
-parser.add_argument('-n', '--name', action='store')  
+parser.add_argument('-n', '--name', action='store')
 parser.add_argument('-e', '--encrypt', action='store_true')  
 parser.add_argument('-E', '--header_encrypt', action='store_true')  
 parser.add_argument('-y', '--confirm', action='store_true')  
 args = parser.parse_args()
+
+if args.method not in methods or args.method == "":
+    print("Not a valid method.")
+    exit()
 
 #print(args.target_dir)
 if args.compress and args.decompress:
@@ -40,15 +45,21 @@ elif args.compress == True:
 elif args.decompress == True:
     action="Decompress"
 
-if not args.confirm:
+print(f"Action: {action}\nTarget Directory: {args.target_dir}\nOutput Directory: {args.out_dir}\nMethod: {args.method}\nArchive Name: {args.name}\nEncryption: {args.encrypt}\nHeader Encryption: {args.header_encrypt}\n")
 
-    print(f"Action: {action}\nTarget Directory: {args.target_dir}\nOutput Directory: {args.out_dir}\nMethod: {args.method}\nArchive Name: {args.name}\nEncryption: {args.encrypt}\nHeader Encryption: {args.header_encrypt}\n")
-
+if args.confirm == False:
     confirm = input("Is this correct? ")
-    if confirm.lower == 'y' or 'yes':
-        pass
-    elif confirm.lower == 'n' or 'no':
+    if confirm.lower() == 'y' or confirm.lower() == 'yes':
+        if action == "Compress":
+            # Do compress
+            print("Compressing")
+            octo_compress(args.method, args.target_dir, args.out_dir, args.name, args.encrypt, args.header_encrypt)
+        elif action == "Decompress":
+            # Do decompress
+            print("Decompressing")
+    elif confirm.lower() == 'n' or confirm.lower() == 'no':
         exit()
-    else:
-        print("Invalid input.\n Expecting yes (y) or no (n).")
+    elif confirm.lower() != 'y' or confirm.lower() != 'yes' or confirm.lower() != 'n' or confirm.lower() != 'no':
+        print("Invalid input. Expecting yes(y) or no(n).")
         exit()
+
